@@ -1,0 +1,65 @@
+version: '3'
+
+dotenv: ['.env']
+
+tasks:
+
+  demo:
+    cmds:
+      - task: install-deps
+      - task: build-protobufs
+      - task: test
+      - task: start
+
+  build-protobufs:
+    cmds:
+      - go mod tidy
+      - protoc --go_out=./api/wallet_pb --go-grpc_out=./api/wallet_pb 
+          ./api/wallet_pb/wallet.proto 
+    silent: true
+
+  build:
+    dir: cmd/wallet
+    cmds:
+      - go build wallet.go
+    silent: true
+
+  start:
+    cmds:
+      - go run cmd/wallet/wallet.go
+    silent: true
+
+  test:
+    cmds:
+      - go clean -testcache
+      - go test ./... -v
+
+  docker-start:
+    cmds:
+      - docker-compose up --build wallet
+
+  docker-rebuild-start:
+    cmds:
+      - docker-compose up --force-recreate --build
+
+  docker-stop:
+    cmds:
+      - docker-compose down
+
+  docker-start-db:
+    cmds:
+      - docker-compose up postgres
+
+  clean:
+    cmds:
+      - task: docker-stop
+      - docker-compose down --volumes
+
+  kill:
+    cmds:
+      - killall -9 wallet
+
+  install-deps:
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0

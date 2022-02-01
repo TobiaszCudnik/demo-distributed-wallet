@@ -1,0 +1,48 @@
+syntax = "proto3";
+package wallet_pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./;wallet_pb";
+
+service WalletService {
+	rpc AlterBalance(AlterBalanceReq) returns (AlterBalanceRes);
+	rpc GetBalance(GetBalanceReq) returns (GetBalanceRes);
+	rpc CreateWallet(CreateWalletReq) returns (CreateWalletRes);
+}
+
+message AlterBalanceReq {
+  string wallet_id = 1; // uuid
+  string nonce = 2;
+  int64 amount = 3;
+}
+
+message AlterBalanceRes {
+  string wallet_id = 1; // uuid
+  int64 balance = 2;
+}
+
+message GetBalanceReq {
+  string wallet_id = 1; // uuid
+}
+
+message GetBalanceRes {
+  string wallet_id = 1; // uuid
+  int64 balance = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
+
+message CreateWalletReq {
+  string wallet_id = 1; // uuid
+}
+
+message CreateWalletRes {
+  string wallet_id = 1; // uuid
+}
+
+enum ErrCode {
+  ALREADY_EXECUTED = 0;
+  BALANCE_TOO_LOW = 1;
+  UNKNOWN_WALLET = 2;
+  INTERNAL_ERROR = 3;
+}

@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  wallet:
+    build: .
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - postgres
+    ports:
+      - "${RPC_PORT}:${RPC_PORT}"
+    volumes:
+      - gopath:/go/pkg
+      - gocache:/root/.cache/go-build
+
+  postgres:
+    image: postgres:14-alpine
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "${POSTGRES_USER}" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+
+volumes:
+  gopath:
+  gocache:
+  postgres:
